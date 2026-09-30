@@ -60,6 +60,14 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Celulares ya registrados (sólo una huella, sin el número). Evita dos registros
+    // con el mismo celular y distinto correo. Nadie los lee ni los cambia.
+    match /radar_telefonos/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['creada'])
+        && request.resource.data.creada == request.time;
+      allow read, update, delete: if false;
+    }
+
     // Todo lo demás, cerrado.
     match /{document=**} { allow read, write: if false; }
   }

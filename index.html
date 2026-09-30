@@ -396,8 +396,13 @@ async function envia() {
   if (!prueba) {
     try {
       await conecta();
+      // Un registro por correo y uno por celular: se guardan juntos o no se guarda ninguno.
       const id = await huella(correo);
-      await fs.setDoc(fs.doc(db, "radar_convencion", id), { ...doc, creada: fs.serverTimestamp() });
+      const tel = await huella("tel:" + $("telefono").value.replace(/\D/g, "").slice(-10));
+      const lote = fs.writeBatch(db);
+      lote.set(fs.doc(db, "radar_convencion", id), { ...doc, creada: fs.serverTimestamp() });
+      lote.set(fs.doc(db, "radar_telefonos", tel), { creada: fs.serverTimestamp() });
+      await lote.commit();
       const inc = fs.increment(1), mapa = arr => Object.fromEntries(arr.map(k => [k, inc]));
       const det = Object.fromEntries(Object.entries(r.deteccion).map(([k, v]) => [`${k}_${v}`, inc]));
       const ref = fs.doc(db, "radar_stats", edicion);
@@ -420,9 +425,9 @@ async function envia() {
 // ---------- resultado ----------
 function resultado(doc, stats, duplicado) {
   const nombre = doc.nombre.split(/\s+/)[0];
-  $("gracias").textContent = duplicado ? `${nombre}, este correo ya había participado.` : `Gracias, ${nombre}.`;
+  $("gracias").textContent = duplicado ? `${nombre}, este correo o este celular ya había participado.` : `Gracias, ${nombre}.`;
   if (duplicado) {
-    $("cajaCodigo").innerHTML = `<small>Taza conmemorativa</small><span style="margin:0;color:#fff;font-size:16px">Su registro anterior ya está guardado. En el stand de GMC360 lo localizamos con su correo.</span>`;
+    $("cajaCodigo").innerHTML = `<small>Taza conmemorativa</small><span style="margin:0;color:#fff;font-size:16px">Su registro anterior ya está guardado. En el stand de GMC360 lo localizamos con su correo o su celular.</span>`;
   } else $("codigo").textContent = doc.codigo;
 
   const reales = doc.vistos.filter(x => x !== "ninguno");
