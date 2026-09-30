@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Radar de Tipologías · Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--negro:#1b1b1e;--carbon:#393e41;--gris:#747975;--gris-claro:#dfdede;--verde:#64c27b;--fondo:#f6fff8}
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--negro);background:#fff}
+  header{background:linear-gradient(180deg,#1b1b1e,#393e41);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:3px solid var(--verde)}
+  header .lg{display:flex;align-items:center;gap:12px}
+  header img{height:26px} header i{width:1px;height:22px;background:#5a5f62}
+  h1{font-family:"Space Grotesk",Arial,sans-serif;font-weight:500;font-size:19px;margin:0 0 0 6px}
+  main{padding:20px}
+  button{font:inherit;font-weight:600;border-radius:2px;padding:10px 16px;cursor:pointer;border:1px solid transparent}
+  .primario{background:var(--verde);color:var(--negro)} .secundario{background:transparent;color:#fff;border-color:#666}
+  .kpis{display:flex;gap:32px;margin:0 0 18px;flex-wrap:wrap}
+  .kpis b{display:block;font-family:"Space Grotesk",Arial,sans-serif;font-size:34px;font-weight:500}
+  .kpis span{font-size:13px;color:var(--gris)}
+  #buscar{width:100%;max-width:420px;padding:12px 14px;font-size:16px;border:1px solid var(--gris-claro);border-radius:2px;margin:0 0 14px}
+  .tabla{overflow:auto;border:1px solid var(--gris-claro)}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th{background:var(--verde);color:var(--negro);text-align:left;padding:10px;white-space:nowrap;position:sticky;top:0}
+  td{padding:9px 10px;border-top:1px solid var(--gris-claro);vertical-align:top}
+  td.cod{font-family:"Space Grotesk",Arial,sans-serif;font-size:16px;white-space:nowrap}
+  .taza{padding:6px 10px;border:1px solid var(--carbon);background:#fff;font-size:13px}
+  .taza.ok{background:var(--negro);color:#fff;border-color:var(--negro)}
+  .centro{max-width:480px;margin:80px auto;text-align:center}
+  .oculto{display:none!important}
+  .nota{color:var(--gris);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="lg"><img src="img/gmc360-blanco.png" alt="GMC360"><i></i><img src="img/lexquo-metal.png" alt="LEX-QUO"><h1>Radar · Panel</h1></div>
+  <div>
+    <button class="primario oculto" id="excel">Descargar Excel</button>
+    <button class="secundario oculto" id="recargar">Actualizar</button>
+    <button class="secundario oculto" id="salir">Salir</button>
+  </div>
+</header>
+<main>
+  <div class="centro" id="entrar">
+    <p>Acceso sólo para el equipo de GMC360.</p>
+    <button class="primario" id="login">Entrar con Google</button>
+    <p class="nota" id="msg"></p>
+  </div>
+  <div id="panel" class="oculto">
+    <div class="kpis" id="kpis"></div>
+    <input id="buscar" placeholder="Buscar por código, nombre, correo o institución">
+    <div class="tabla"><table id="tabla"></table></div>
+    <p class="nota">«Taza» se guarda al tocarla. Un registro por correo: si alguien vuelve a responder con el mismo correo, la base no lo acepta.</p>
+  </div>
+</main>
+<script type="module">
+import { firebaseConfig, administradores, edicion } from "./config.js";
+import { tipologias, tipoInstitucion, deteccion, alertas, pasos } from "./preguntas.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app), db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const etq = (lista, id) => (lista.find(x => x[0] === id) || [id, id])[1];
+const nomTip = id => id === "ninguno" ? "Ninguno" : (tipologias.find(t => t.id === id)?.nombre ?? id);
+const fecha = ts => ts?.toDate ? ts.toDate() : null;
+let filas = [];
+
+$("login").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => $("msg").textContent = e.message);
+$("salir").onclick = () => signOut(auth);
+$("recargar").onclick = () => carga();
+$("buscar").oninput = () => pinta();
+
+onAuthStateChanged(auth, async user => {
+  const ok = user && administradores.includes(user.email);
+  $("entrar").classList.toggle("oculto", !!ok);
+  $("panel").classList.toggle("oculto", !ok);
+  ["excel", "recargar"].forEach(id => $(id).classList.toggle("oculto", !ok));
+  $("salir").classList.toggle("oculto", !user);
+  if (user && !ok) $("msg").textContent = `${user.email} no está autorizado.`;
+  if (ok) await carga();
+});
+
+async function carga() {
+  const snap = await getDocs(query(collection(db, "radar_convencion"), where("edicion", "==", edicion)));
+  filas = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (fecha(b.creada) || 0) - (fecha(a.creada) || 0));
+  pinta();
+}
+
+function pinta() {
+  const q = $("buscar").value.trim().toLowerCase();
+  const vis = !q ? filas : filas.filter(f => [f.codigo, f.nombre, f.correo, f.institucion].some(v => String(v || "").toLowerCase().includes(q)));
+  $("kpis").innerHTML = [["Participantes", filas.length], ["Aceptan información", filas.filter(f => !f.noInfo).length], ["Tazas entregadas", filas.filter(f => f.taza).length]]
+    .map(([t, n]) => `<div><b>${n}</b><span>${t}</span></div>`).join("");
+  const cols = ["Código", "Taza", "Hora", "Nombre", "Puesto", "Institución", "Tipo", "Correo", "Teléfono", "Información", "Comportamientos"];
+  $("tabla").innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr>` + vis.map(f => `<tr>
+    <td class="cod">${esc(f.codigo)}</td>
+    <td><button class="taza${f.taza ? " ok" : ""}" data-id="${esc(f.id)}">${f.taza ? "Entregada" : "Pendiente"}</button></td>
+    <td>${fecha(f.creada)?.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) ?? ""}</td>
+    <td>${esc(f.nombre)}</td><td>${esc(f.puesto)}</td><td>${esc(f.institucion)}</td><td>${esc(etq(tipoInstitucion, f.tipo))}</td>
+    <td>${esc(f.correo)}</td><td>${esc(f.telefono)}</td><td>${f.noInfo ? "No" : "Sí"}</td>
+    <td>${esc((f.vistos || []).map(nomTip).join("; "))}</td></tr>`).join("");
+  document.querySelectorAll("button.taza").forEach(b => b.onclick = async () => {
+    const f = filas.find(x => x.id === b.dataset.id);
+    await updateDoc(doc(db, "radar_convencion", f.id), { taza: !f.taza });
+    f.taza = !f.taza; pinta();
+  });
+}
+
+$("excel").onclick = async () => {
+  const XLSX = await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
+  const datos = filas.map(f => {
+    const r = {
+      "Recibida": fecha(f.creada), "Código": f.codigo, "Taza entregada": f.taza ? "Sí" : "No",
+      "Nombre": f.nombre, "Puesto": f.puesto, "Institución": f.institucion, "Correo": f.correo, "Teléfono": f.telefono,
+      "Acepta información comercial": f.noInfo ? "No" : "Sí",
+      "Tipo de institución": etq(tipoInstitucion, f.tipo),
+      "Comportamientos vistos": (f.vistos || []).map(nomTip).join("; "),
+    };
+    tipologias.forEach(t => { r[`Detección · ${t.nombre}`] = f.deteccion?.[t.id] ? etq(deteccion, f.deteccion[t.id]) : ""; });
+    r["Alerta con más trabajo y menos resultado"] = etq(alertas, f.alerta);
+    r["Paso más complicado"] = etq(pasos, f.paso);
+    r["Lo que el catálogo de la UIF no describe"] = f.abierta || "";
+    return r;
+  });
+  const ws = XLSX.utils.json_to_sheet(datos, { cellDates: true });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Radar");
+  XLSX.writeFile(wb, `Radar_Tipologias_${new Date().toISOString().slice(0, 10)}.xlsx`);
+};
+</script>
+</body>
+</html>

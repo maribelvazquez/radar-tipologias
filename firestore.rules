@@ -1,0 +1,66 @@
+rules_version = '2';
+// Reglas del proyecto de Firebase del RADAR DE TIPOLOGÍAS SOFIPO.
+// Proyecto exclusivo del Radar: no contiene datos de ningún otro sistema.
+// Público: sólo puede CREAR una respuesta válida. Nadie de fuera puede leer, cambiar ni borrar.
+// Equipo: puede leer y marcar la taza. Pon aquí los mismos correos que en config.js.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function esEquipo() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'mvazquez@gmc360.com.mx',
+          'samara@gmc360.com.mx',
+          'amanda@gmc360.com.mx',
+          'arely@gmc360.com.mx'
+        ];
+    }
+
+    function texto(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
+    function textoOpc(v, max) { return v is string && v.size() <= max; }
+
+    // Respuestas. Un registro por correo: el id del documento es la huella del correo
+    // y no se permite sobrescribirlo.
+    match /radar_convencion/{id} {
+      allow create: if request.resource.data.keys().hasOnly([
+            'edicion','nombre','puesto','institucion','correo','telefono','tipo','vistos','deteccion',
+            'alerta','paso','abierta','aviso','noInfo','codigo','taza','creada'])
+        && texto(request.resource.data.nombre, 120)
+        && texto(request.resource.data.puesto, 60)
+        && texto(request.resource.data.institucion, 160)
+        && texto(request.resource.data.correo, 150)
+        && texto(request.resource.data.telefono, 20)
+        && texto(request.resource.data.tipo, 20)
+        && texto(request.resource.data.alerta, 20)
+        && texto(request.resource.data.paso, 20)
+        && textoOpc(request.resource.data.abierta, 280)
+        && texto(request.resource.data.codigo, 8)
+        && texto(request.resource.data.edicion, 30)
+        && request.resource.data.vistos is list && request.resource.data.vistos.size() >= 1 && request.resource.data.vistos.size() <= 3
+        && request.resource.data.deteccion is map && request.resource.data.deteccion.size() <= 3
+        && request.resource.data.aviso == true
+        && request.resource.data.noInfo is bool
+        && request.resource.data.taza == false
+        && request.resource.data.creada == request.time;
+      allow read: if esEquipo();
+      // El equipo sólo puede marcar la taza como entregada.
+      allow update: if esEquipo()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['taza']);
+      allow delete: if false;
+    }
+
+    // Conteos anónimos que ve el participante al terminar (sin datos personales).
+    match /radar_stats/{edicion} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['total','inst','vis','det','alr','paso'])
+        && request.resource.data.total == 1;
+      allow update: if request.resource.data.keys().hasOnly(['total','inst','vis','det','alr','paso'])
+        && request.resource.data.total == resource.data.total + 1;
+      allow delete: if false;
+    }
+
+    // Todo lo demás, cerrado.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

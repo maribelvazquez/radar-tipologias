@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Radar de Tipologías SOFIPO · GMC360 · LEX-QUO</title>
+<meta name="description" content="Dos minutos, seis preguntas: vea qué está detectando el sector y descargue el Compendio de Tipologías para SOFIPOs.">
+<meta name="theme-color" content="#1b1b1e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--negro:#1b1b1e;--carbon:#393e41;--gris:#747975;--gris-claro:#dfdede;--verde:#64c27b;--verde-claro:#87d895;--fondo:#f6fff8;
+        --metal:linear-gradient(90deg,#878787 0%,#bfbfbf 50%,#878787 100%)}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:#fff;color:var(--negro);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .oculto{display:none!important}
+
+  header{background:linear-gradient(180deg,#1b1b1e 0%,#393e41 100%);color:#fff;position:relative}
+  header:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--metal)}
+  .barra{max-width:640px;margin:0 auto;padding:16px 20px 18px;display:flex;align-items:center;gap:14px}
+  .barra img.g{height:30px} .barra img.l{height:26px} .barra i{width:1px;height:24px;background:#5a5f62}
+  .avance{height:4px;background:#2b2f31}
+  .avance span{display:block;height:100%;width:0;background:var(--verde);transition:width .35s ease}
+
+  main{max-width:640px;margin:0 auto;padding:28px 20px 120px}
+  .eyebrow{font-family:"Space Grotesk",Arial,sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--carbon);font-weight:500;margin:0 0 10px}
+  h1{font-family:"Space Grotesk",Arial,sans-serif;font-weight:500;font-size:clamp(30px,8vw,42px);line-height:1.06;letter-spacing:-.02em;margin:0 0 16px}
+  h2{font-family:"Space Grotesk",Arial,sans-serif;font-weight:500;font-size:clamp(22px,5.6vw,27px);line-height:1.18;letter-spacing:-.01em;margin:0 0 8px}
+  .ayuda{color:var(--carbon);font-size:15px;margin:0 0 20px}
+  p{line-height:1.55}
+
+  /* portada */
+  .intro .lead{font-size:17px;line-height:1.55;color:var(--carbon);margin:0 0 22px}
+  .regalos{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 26px}
+  .regalos div{background:var(--fondo);border-top:2px solid var(--verde);padding:14px 14px 16px;font-size:14px;line-height:1.4;color:var(--carbon)}
+  .regalos b{display:block;font-family:"Space Grotesk",Arial,sans-serif;font-weight:500;font-size:17px;color:var(--negro);margin-bottom:4px}
+  .datos-intro{display:flex;gap:22px;font-size:13px;color:var(--gris);margin-top:14px}
+
+  /* opciones */
+  .opciones{display:grid;gap:10px}
+  .op{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:#fff;border:1px solid var(--gris-claro);border-radius:4px;padding:15px 16px;font-size:16px;line-height:1.35;cursor:pointer;transition:border-color .15s,background .15s}
+  .op:hover{border-color:var(--carbon)}
+  .op .mk{flex:none;width:20px;height:20px;border:1.5px solid var(--carbon);border-radius:2px;display:grid;place-items:center}
+  .op.sel{border-color:var(--negro);background:var(--fondo)}
+  .op.sel .mk{background:var(--verde);border-color:var(--verde)}
+  .op.sel .mk:after{content:"";width:9px;height:5px;border:2px solid var(--negro);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+  .op[disabled]{opacity:.45;cursor:default}
+  .contador{font-size:13px;color:var(--gris);margin:12px 0 0}
+
+  /* detección por fila */
+  .fila{border-top:1px solid var(--gris-claro);padding:14px 0 16px}
+  .fila:last-child{border-bottom:1px solid var(--gris-claro)}
+  .fila .t{font-weight:600;font-size:15px;margin:0 0 10px}
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .seg button{border:1px solid var(--gris-claro);background:#fff;border-radius:2px;padding:10px 4px;font-size:13px;cursor:pointer}
+  .seg button.sel{background:var(--negro);border-color:var(--negro);color:#fff;font-weight:600}
+
+  /* campos */
+  label.campo{display:block;margin:0 0 16px}
+  label.campo span{display:block;font-size:14px;font-weight:600;margin:0 0 6px}
+  input[type=text],input[type=email],input[type=tel],select,textarea{width:100%;border:1px solid var(--gris-claro);border-radius:2px;padding:13px 14px;font-size:16px;background:#fff;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--negro);box-shadow:0 0 0 2px var(--verde-claro)}
+  textarea{min-height:110px;resize:vertical;line-height:1.45}
+  .cuenta{font-size:12px;color:var(--gris);text-align:right;margin-top:4px}
+  .aviso-caja{background:var(--fondo);border-top:2px solid var(--verde);padding:14px 16px;font-size:14px;line-height:1.5;color:var(--carbon);margin:6px 0 16px}
+  .aviso-caja a{color:var(--negro);font-weight:600}
+  .check{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45;margin:0 0 12px;cursor:pointer}
+  .check input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--negro)}
+  .error{color:#8a2a22;font-size:14px;margin:10px 0 0;min-height:20px}
+
+  /* navegación fija */
+  .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-top:1px solid var(--gris-claro);padding:12px 20px calc(12px + env(safe-area-inset-bottom))}
+  .nav .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
+  .btn{border:1px solid transparent;border-radius:2px;padding:15px 20px;font-size:16px;font-weight:600;cursor:pointer}
+  .btn.pri{flex:1;background:var(--negro);color:#fff}
+  .btn.pri[disabled]{background:#b9bcba;cursor:default}
+  .btn.sec{background:#fff;border-color:var(--gris-claro);color:var(--negro)}
+  .btn.verde{background:var(--verde);color:var(--negro);display:block;width:100%;text-align:center;text-decoration:none}
+
+  /* resultado */
+  .codigo{background:var(--negro);color:#fff;padding:22px 20px 20px;position:relative;margin:4px 0 22px}
+  .codigo:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--metal)}
+  .codigo small{display:block;font-family:"Space Grotesk",Arial,sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--verde);margin-bottom:8px}
+  .codigo b{display:block;font-family:"Space Grotesk",Arial,sans-serif;font-weight:500;font-size:44px;letter-spacing:.06em;line-height:1}
+  .codigo span{display:block;color:#c9cdcb;font-size:14px;margin-top:10px}
+  .bloque{margin:30px 0 0}
+  .bloque h3{font-family:"Space Grotesk",Arial,sans-serif;font-weight:500;font-size:20px;margin:0 0 4px;padding-bottom:8px;border-bottom:2px solid var(--verde);display:inline-block}
+  .ficha{border-top:1px solid var(--gris-claro);margin-top:14px;padding-top:12px}
+  .ficha .num{display:inline-block;background:var(--verde);color:var(--negro);font-family:"Space Grotesk",Arial,sans-serif;font-weight:600;padding:3px 8px;margin-right:8px}
+  .ficha ul{margin:12px 0 0;padding:0;list-style:none}
+  .ficha li{position:relative;padding:8px 0 8px 16px;border-bottom:1px solid #eef0ee;font-size:15px;line-height:1.45}
+  .ficha li:before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;background:var(--verde)}
+  .nota{font-size:13px;color:var(--gris);margin:10px 0 0}
+  .barras{margin-top:14px}
+  .b{margin:0 0 11px}
+  .b .et{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:1.35;margin-bottom:5px;color:var(--carbon)}
+  .b .et b{color:var(--negro);font-variant-numeric:tabular-nums}
+  .b .pista{height:10px;background:#eef0ee}
+  .b .pista span{display:block;height:100%;background:#9ea3a0}
+  .b.suya .et{color:var(--negro);font-weight:600}
+  .b.suya .pista span{background:var(--verde)}
+  .firma{margin-top:36px;padding-top:16px;border-top:1px solid var(--gris-claro);font-size:13px;color:var(--gris);line-height:1.5}
+  .modo-prueba{background:#fff8e8;border:1px solid #e9cf96;color:#5c4200;padding:10px 14px;font-size:14px;margin:0 0 20px}
+  @media (min-width:720px){ main{padding-top:44px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="barra"><img class="g" src="img/gmc360-blanco.png" alt="GMC360"><i></i><img class="l" src="img/lexquo-metal.png" alt="LEX-QUO"></div>
+  <div class="avance"><span id="avance"></span></div>
+</header>
+
+<main>
+  <div id="modoPrueba" class="modo-prueba oculto">Modo de prueba: falta la configuración de Firebase. La encuesta funciona, pero no guarda respuestas.</div>
+
+  <!-- 0 · portada -->
+  <section data-paso="0" class="intro">
+    <p class="eyebrow">11ª Convención AMSOFIPO · Radar de tipologías</p>
+    <h1>¿Qué está viendo su institución?</h1>
+    <p class="lead">Seis preguntas, dos minutos. Al terminar verá lo que va respondiendo el resto del sector y se lleva dos cosas.</p>
+    <div class="regalos">
+      <div><b>Compendio</b>Tipologías para SOFIPOs: 8 fichas con señales, parámetros y narrativas. PDF para descargar.</div>
+      <div><b>Taza conmemorativa</b>Con el código que le daremos al final, en el stand de GMC360.</div>
+    </div>
+    <p class="nota">Sus respuestas se presentan sólo de forma agregada, sin identificar a personas ni instituciones.</p>
+  </section>
+
+  <!-- 1 · tipo de institución -->
+  <section data-paso="1" class="oculto">
+    <p class="eyebrow">1 de 6</p>
+    <h2>¿Qué tipo de institución es la suya?</h2>
+    <p class="ayuda">Así comparamos sus respuestas con las de instituciones parecidas.</p>
+    <div class="opciones" id="opTipo"></div>
+  </section>
+
+  <!-- 2 · comportamientos -->
+  <section data-paso="2" class="oculto">
+    <p class="eyebrow">2 de 6</p>
+    <h2>¿Cuáles de estos comportamientos ha visto en su institución en los últimos seis meses?</h2>
+    <p class="ayuda">Elija hasta tres.</p>
+    <div class="opciones" id="opVistos"></div>
+    <p class="contador" id="contVistos"></p>
+  </section>
+
+  <!-- 3 · detección -->
+  <section data-paso="3" class="oculto">
+    <p class="eyebrow">3 de 6</p>
+    <h2>¿Quién lo detectó primero?</h2>
+    <p class="ayuda">Una respuesta por comportamiento.</p>
+    <div id="opDeteccion"></div>
+  </section>
+
+  <!-- 4 · alerta -->
+  <section data-paso="4" class="oculto">
+    <p class="eyebrow">4 de 6</p>
+    <h2>¿Qué alerta le genera más trabajo con menos resultado?</h2>
+    <p class="ayuda">La que más revisa y menos termina en reporte.</p>
+    <div class="opciones" id="opAlerta"></div>
+  </section>
+
+  <!-- 5 · paso difícil -->
+  <section data-paso="5" class="oculto">
+    <p class="eyebrow">5 de 6</p>
+    <h2>¿En qué paso se le complica más un caso?</h2>
+    <p class="ayuda">Del momento en que aparece la señal al reporte.</p>
+    <div class="opciones" id="opPaso"></div>
+  </section>
+
+  <!-- 6 · abierta -->
+  <section data-paso="6" class="oculto">
+    <p class="eyebrow">6 de 6 · opcional</p>
+    <h2>¿Qué comportamiento está viendo que el catálogo de la UIF no describe bien?</h2>
+    <p class="ayuda">Una línea basta. Sin nombres ni datos de clientes.</p>
+    <textarea id="abierta" maxlength="280" placeholder="Por ejemplo: cuentas que reciben pagos de apuestas en línea y los retiran el mismo día"></textarea>
+    <div class="cuenta"><span id="cuentaAbierta">0</span> / 280</div>
+  </section>
+
+  <!-- 7 · datos -->
+  <section data-paso="7" class="oculto">
+    <p class="eyebrow">Último paso</p>
+    <h2>¿A dónde le enviamos sus resultados?</h2>
+    <p class="ayuda">Con estos datos le damos su código para la taza y le compartimos el resultado final del Radar.</p>
+    <label class="campo"><span>Nombre</span><input type="text" id="nombre" maxlength="120" autocomplete="name"></label>
+    <label class="campo"><span>Puesto</span><select id="puesto"><option value="">Seleccione</option></select></label>
+    <label class="campo"><span>Institución</span><input type="text" id="institucion" maxlength="160" autocomplete="organization"></label>
+    <label class="campo"><span>Correo</span><input type="email" id="correo" maxlength="150" autocomplete="email" inputmode="email"></label>
+    <label class="campo"><span>Teléfono</span><input type="tel" id="telefono" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="10 dígitos"></label>
+    <div class="aviso-caja">
+      Grupo Mexicano de Consultoría 360 trata sus datos para registrar su participación, entregarle el compendio y la taza, y presentar resultados agregados sin identificarle. De manera adicional, para enviarle información de servicios de GMC360 y LEX-QUO. <a href="aviso-privacidad.html" target="_blank" rel="noopener">Aviso de privacidad integral</a>.
+    </div>
+    <label class="check"><input type="checkbox" id="aviso"> <span>He leído el aviso de privacidad.</span></label>
+    <label class="check"><input type="checkbox" id="noInfo"> <span>No deseo que mis datos se usen para recibir información de servicios de GMC360 y LEX-QUO.</span></label>
+    <p class="error" id="error"></p>
+  </section>
+
+  <!-- 8 · resultado -->
+  <section data-paso="8" class="oculto" id="resultado">
+    <p class="eyebrow">Gracias por participar</p>
+    <h2 id="gracias">Listo.</h2>
+    <div class="codigo" id="cajaCodigo"><small>Su código para la taza</small><b id="codigo">—</b><span>Muéstrelo en el stand de GMC360.</span></div>
+    <a class="btn verde" href="Compendio_Tipologias_SOFIPOs.pdf" download>Descargar el compendio (PDF)</a>
+
+    <div class="bloque" id="bloqueFicha">
+      <h3>Su tipología principal</h3>
+      <div class="ficha" id="ficha"></div>
+    </div>
+
+    <div class="bloque">
+      <h3>Lo que va respondiendo la convención</h3>
+      <p class="nota" id="totalRadar"></p>
+      <div class="barras" id="barras"></div>
+      <p class="nota">Porcentaje de participantes que ha visto cada comportamiento. En verde, los que usted marcó.</p>
+    </div>
+
+    <div class="bloque oculto" id="bloquePaso">
+      <h3>Su mayor reto</h3>
+      <p id="textoPaso"></p>
+    </div>
+
+    <div class="firma">GMC360 · LEX-QUO<br>Los resultados finales se compartirán con quienes participaron, de forma agregada.</div>
+  </section>
+</main>
+
+<div class="nav" id="nav">
+  <div class="in">
+    <button class="btn sec oculto" id="atras" type="button" aria-label="Anterior">←</button>
+    <button class="btn pri" id="siguiente" type="button">Empezar</button>
+  </div>
+</div>
+
+<script type="module">
+import { firebaseConfig, edicion } from "./config.js";
+import { tipologias, tipoInstitucion, deteccion, alertas, pasos, puestos } from "./preguntas.js";
+
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const prueba = new URLSearchParams(location.search).has("prueba") || Object.values(firebaseConfig).some(v => String(v).includes("PEGAR_AQUI"));
+
+let db = null, fs = null;
+async function conecta() {
+  if (prueba || db) return;
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+  fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  db = fs.getFirestore(initializeApp(firebaseConfig));
+}
+if (prueba) $("modoPrueba").classList.remove("oculto"); else conecta().catch(() => {});
+
+// ---------- estado ----------
+const r = { tipo: "", vistos: [], deteccion: {}, alerta: "", paso: "", abierta: "" };
+let paso = 0;
+const TOTAL = 8;
+
+// ---------- pintar opciones ----------
+function opcion(id, texto, sel) {
+  return `<button type="button" class="op${sel ? " sel" : ""}" data-v="${esc(id)}"><span class="mk"></span><span>${esc(texto)}</span></button>`;
+}
+function unica(cont, lista, campo) {
+  const pinta = () => {
+    $(cont).innerHTML = lista.map(([id, t]) => opcion(id, t, r[campo] === id)).join("");
+    $(cont).querySelectorAll(".op").forEach(b => b.onclick = () => {
+      r[campo] = b.dataset.v; pinta(); actualiza();
+      setTimeout(() => avanza(1), 260);
+    });
+  };
+  pinta();
+}
+unica("opTipo", tipoInstitucion, "tipo");
+unica("opAlerta", alertas, "alerta");
+unica("opPaso", pasos, "paso");
+
+function pintaVistos() {
+  const lleno = r.vistos.length >= 3 && !r.vistos.includes("ninguno");
+  const lista = tipologias.map(t => [t.id, t.opcion]).concat([["ninguno", "Ninguno de estos"]]);
+  $("opVistos").innerHTML = lista.map(([id, t]) => {
+    const sel = r.vistos.includes(id);
+    const dis = !sel && lleno;
+    return opcion(id, t, sel).replace("<button", `<button${dis ? " disabled" : ""}`);
+  }).join("");
+  $("opVistos").querySelectorAll(".op").forEach(b => b.onclick = () => {
+    const v = b.dataset.v;
+    if (v === "ninguno") r.vistos = r.vistos.includes("ninguno") ? [] : ["ninguno"];
+    else {
+      r.vistos = r.vistos.filter(x => x !== "ninguno");
+      r.vistos = r.vistos.includes(v) ? r.vistos.filter(x => x !== v) : (r.vistos.length < 3 ? [...r.vistos, v] : r.vistos);
+    }
+    pintaVistos(); actualiza();
+  });
+  const n = r.vistos.filter(x => x !== "ninguno").length;
+  $("contVistos").textContent = r.vistos.includes("ninguno") ? "" : `${n} de 3 seleccionados`;
+}
+pintaVistos();
+
+function pintaDeteccion() {
+  const reales = r.vistos.filter(x => x !== "ninguno");
+  Object.keys(r.deteccion).forEach(k => { if (!reales.includes(k)) delete r.deteccion[k]; });
+  $("opDeteccion").innerHTML = reales.map(k => {
+    const t = tipologias.find(x => x.id === k);
+    return `<div class="fila"><p class="t">${esc(t.nombre)}</p><div class="seg" data-k="${k}">${
+      deteccion.map(([id, txt]) => `<button type="button" data-v="${id}" class="${r.deteccion[k] === id ? "sel" : ""}">${txt}</button>`).join("")}</div></div>`;
+  }).join("");
+  $("opDeteccion").querySelectorAll(".seg button").forEach(b => b.onclick = () => {
+    r.deteccion[b.parentElement.dataset.k] = b.dataset.v; pintaDeteccion(); actualiza();
+  });
+}
+
+const sel = $("puesto");
+puestos.forEach(p => sel.insertAdjacentHTML("beforeend", `<option>${esc(p)}</option>`));
+$("abierta").oninput = e => { r.abierta = e.target.value; $("cuentaAbierta").textContent = e.target.value.length; };
+["nombre", "puesto", "institucion", "correo", "telefono", "aviso"].forEach(id => $(id).addEventListener("input", actualiza));
+$("aviso").addEventListener("change", actualiza);
+
+// ---------- navegación ----------
+const saltaDeteccion = () => r.vistos.length === 0 || r.vistos.includes("ninguno");
+function valido(p) {
+  if (p === 1) return !!r.tipo;
+  if (p === 2) return r.vistos.length > 0;
+  if (p === 3) return r.vistos.filter(x => x !== "ninguno").every(k => r.deteccion[k]);
+  if (p === 4) return !!r.alerta;
+  if (p === 5) return !!r.paso;
+  if (p === 7) return datosValidos() === "";
+  return true;
+}
+function datosValidos() {
+  const correo = $("correo").value.trim(), tel = $("telefono").value.replace(/\D/g, "");
+  if ($("nombre").value.trim().length < 3) return "Escriba su nombre.";
+  if (!$("puesto").value) return "Seleccione su puesto.";
+  if ($("institucion").value.trim().length < 2) return "Escriba su institución.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo)) return "Revise su correo.";
+  if (tel.length < 10 || tel.length > 13) return "Escriba un teléfono de 10 dígitos.";
+  if (!$("aviso").checked) return "Confirme que leyó el aviso de privacidad.";
+  return "";
+}
+function actualiza() {
+  $("avance").style.width = `${Math.min(paso, 7) / 7 * 100}%`;
+  $("atras").classList.toggle("oculto", paso === 0 || paso === 8);
+  $("nav").classList.toggle("oculto", paso === 8);
+  const b = $("siguiente");
+  b.textContent = paso === 0 ? "Empezar" : paso === 6 ? (r.abierta.trim() ? "Continuar" : "Omitir") : paso === 7 ? "Ver mis resultados" : "Continuar";
+  b.disabled = !valido(paso);
+  if (paso === 7) $("error").textContent = "";
+}
+function muestra(p) {
+  paso = p;
+  document.querySelectorAll("section[data-paso]").forEach(s => s.classList.toggle("oculto", +s.dataset.paso !== p));
+  if (p === 3) pintaDeteccion();
+  actualiza();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function avanza(d) {
+  let p = paso + d;
+  if (p === 3 && saltaDeteccion()) p += d;
+  if (p >= 0 && p <= 7) muestra(p);
+}
+$("atras").onclick = () => avanza(-1);
+$("siguiente").onclick = async () => {
+  if (paso < 7) return avanza(1);
+  const err = datosValidos();
+  if (err) { $("error").textContent = err; return; }
+  await envia();
+};
+
+// ---------- envío ----------
+const ALFA = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const nuevoCodigo = () => "R-" + Array.from(crypto.getRandomValues(new Uint8Array(4)), n => ALFA[n % ALFA.length]).join("");
+async function huella(correo) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${edicion}|${correo}`));
+  return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, "0")).join("").slice(0, 28);
+}
+
+async function envia() {
+  const b = $("siguiente");
+  b.disabled = true; b.textContent = "Enviando…";
+  const correo = $("correo").value.trim().toLowerCase();
+  const codigo = nuevoCodigo();
+  const reales = r.vistos.filter(x => x !== "ninguno");
+  const doc = {
+    edicion,
+    nombre: $("nombre").value.trim(),
+    puesto: $("puesto").value,
+    institucion: $("institucion").value.trim(),
+    correo,
+    telefono: $("telefono").value.trim(),
+    tipo: r.tipo,
+    vistos: r.vistos,
+    deteccion: r.deteccion,
+    alerta: r.alerta,
+    paso: r.paso,
+    abierta: r.abierta.trim().slice(0, 280),
+    aviso: true,
+    noInfo: $("noInfo").checked,
+    codigo,
+    taza: false,
+  };
+  let stats = null, duplicado = false;
+  if (!prueba) {
+    try {
+      await conecta();
+      const id = await huella(correo);
+      await fs.setDoc(fs.doc(db, "radar_convencion", id), { ...doc, creada: fs.serverTimestamp() });
+      const inc = fs.increment(1), mapa = arr => Object.fromEntries(arr.map(k => [k, inc]));
+      const det = Object.fromEntries(Object.entries(r.deteccion).map(([k, v]) => [`${k}_${v}`, inc]));
+      const ref = fs.doc(db, "radar_stats", edicion);
+      await fs.setDoc(ref, {
+        total: inc, inst: mapa([r.tipo]), vis: mapa(r.vistos), det, alr: mapa([r.alerta]), paso: mapa([r.paso])
+      }, { merge: true }).catch(() => {});
+      stats = (await fs.getDoc(ref).catch(() => null))?.data() ?? null;
+    } catch (e) {
+      if (String(e?.code || e).includes("permission")) duplicado = true;
+      else { $("error").textContent = "No se pudo enviar. Revise su conexión e intente de nuevo."; b.disabled = false; b.textContent = "Ver mis resultados"; return; }
+    }
+  }
+  resultado(doc, stats, duplicado);
+}
+
+// ---------- resultado ----------
+function resultado(doc, stats, duplicado) {
+  const nombre = doc.nombre.split(/\s+/)[0];
+  $("gracias").textContent = duplicado ? `${nombre}, este correo ya había participado.` : `Gracias, ${nombre}.`;
+  if (duplicado) {
+    $("cajaCodigo").innerHTML = `<small>Taza conmemorativa</small><span style="margin:0;color:#fff;font-size:16px">Su registro anterior ya está guardado. En el stand de GMC360 lo localizamos con su correo.</span>`;
+  } else $("codigo").textContent = doc.codigo;
+
+  const reales = doc.vistos.filter(x => x !== "ninguno");
+  if (reales.length) {
+    const t = tipologias.find(x => x.id === reales[0]);
+    $("ficha").innerHTML = `<p style="margin:0"><span class="num">${t.num}</span><b style="font-family:'Space Grotesk',Arial;font-weight:500;font-size:19px">${esc(t.nombre)}</b></p>
+      <p class="nota" style="margin-top:6px">${esc(t.sub)}</p>
+      <ul>${t.senales.map(s => `<li>${esc(s)}</li>`).join("")}</ul>
+      <p class="nota">Primero, revise: ${esc(t.revisar.charAt(0).toLowerCase() + t.revisar.slice(1))} La ficha completa, con parámetros y narrativa modelo, está en la página ${t.pagina} del compendio.</p>`;
+  } else {
+    $("ficha").innerHTML = `<p style="margin:0">No marcó ninguno de los ocho comportamientos. El compendio le sirve como lista de verificación: si su monitoreo no ha visto ninguno en seis meses, conviene revisar si los está buscando.</p>`;
+  }
+
+  const total = stats?.total || 0;
+  const vis = stats?.vis || {};
+  $("totalRadar").textContent = total ? `${total} participante${total === 1 ? "" : "s"} hasta ahora.` : "Usted es de los primeros en responder. Vuelva a esta página más tarde: el conteo se actualiza en vivo.";
+  const filas = tipologias.map(t => ({ t, n: vis[t.id] || 0 })).sort((a, b) => b.n - a.n);
+  $("barras").innerHTML = filas.map(({ t, n }) => {
+    const pct = total ? Math.round(n / total * 100) : 0;
+    const suya = reales.includes(t.id);
+    return `<div class="b${suya ? " suya" : ""}"><div class="et"><span>${esc(t.nombre)}</span><b>${pct}%</b></div><div class="pista"><span style="width:${pct}%"></span></div></div>`;
+  }).join("");
+
+  if (stats?.paso && doc.paso && total > 1) {
+    const n = stats.paso[doc.paso] || 0;
+    const txt = pasos.find(p => p[0] === doc.paso)[1];
+    $("textoPaso").innerHTML = `<b>${esc(txt)}</b>. Coincide con el ${Math.round(n / total * 100)}% de quienes han respondido.`;
+    $("bloquePaso").classList.remove("oculto");
+  }
+  muestra(8);
+}
+
+actualiza();
+</script>
+</body>
+</html>
