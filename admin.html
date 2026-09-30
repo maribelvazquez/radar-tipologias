@@ -58,7 +58,7 @@
 import { firebaseConfig, administradores, edicion } from "./config.js";
 import { tipologias, tipoInstitucion, deteccion, alertas, pasos } from "./preguntas.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
@@ -70,7 +70,12 @@ const nomTip = id => id === "ninguno" ? "Ninguno" : (tipologias.find(t => t.id =
 const fecha = ts => ts?.toDate ? ts.toDate() : null;
 let filas = [];
 
-$("login").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => $("msg").textContent = e.message);
+$("login").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
+  // Si el navegador bloquea la ventana emergente, se entra por redirección.
+  if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/cancelled-popup-request"].includes(e.code)) return signInWithRedirect(auth, new GoogleAuthProvider());
+  $("msg").textContent = e.message;
+});
+getRedirectResult(auth).catch(e => $("msg").textContent = e.message);
 $("salir").onclick = () => signOut(auth);
 $("recargar").onclick = () => carga();
 $("buscar").oninput = () => pinta();
@@ -94,15 +99,15 @@ async function carga() {
 function pinta() {
   const q = $("buscar").value.trim().toLowerCase();
   const vis = !q ? filas : filas.filter(f => [f.codigo, f.nombre, f.correo, f.institucion].some(v => String(v || "").toLowerCase().includes(q)));
-  $("kpis").innerHTML = [["Participantes", filas.length], ["Aceptan información", filas.filter(f => !f.noInfo).length], ["Tazas entregadas", filas.filter(f => f.taza).length]]
+  $("kpis").innerHTML = [["Participantes", filas.length], ["Tazas entregadas", filas.filter(f => f.taza).length]]
     .map(([t, n]) => `<div><b>${n}</b><span>${t}</span></div>`).join("");
-  const cols = ["Código", "Taza", "Hora", "Nombre", "Puesto", "Institución", "Tipo", "Correo", "Teléfono", "Información", "Comportamientos"];
+  const cols = ["Código", "Taza", "Hora", "Nombre", "Puesto", "Institución", "Tipo", "Correo", "Teléfono", "Comportamientos"];
   $("tabla").innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr>` + vis.map(f => `<tr>
     <td class="cod">${esc(f.codigo)}</td>
     <td><button class="taza${f.taza ? " ok" : ""}" data-id="${esc(f.id)}">${f.taza ? "Entregada" : "Pendiente"}</button></td>
     <td>${fecha(f.creada)?.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) ?? ""}</td>
     <td>${esc(f.nombre)}</td><td>${esc(f.puesto)}</td><td>${esc(f.institucion)}</td><td>${esc(etq(tipoInstitucion, f.tipo))}</td>
-    <td>${esc(f.correo)}</td><td>${esc(f.telefono)}</td><td>${f.noInfo ? "No" : "Sí"}</td>
+    <td>${esc(f.correo)}</td><td>${esc(f.telefono)}</td>
     <td>${esc((f.vistos || []).map(nomTip).join("; "))}</td></tr>`).join("");
   document.querySelectorAll("button.taza").forEach(b => b.onclick = async () => {
     const f = filas.find(x => x.id === b.dataset.id);
@@ -117,7 +122,6 @@ $("excel").onclick = async () => {
     const r = {
       "Recibida": fecha(f.creada), "Código": f.codigo, "Taza entregada": f.taza ? "Sí" : "No",
       "Nombre": f.nombre, "Puesto": f.puesto, "Institución": f.institucion, "Correo": f.correo, "Teléfono": f.telefono,
-      "Acepta información comercial": f.noInfo ? "No" : "Sí",
       "Tipo de institución": etq(tipoInstitucion, f.tipo),
       "Comportamientos vistos": (f.vistos || []).map(nomTip).join("; "),
     };

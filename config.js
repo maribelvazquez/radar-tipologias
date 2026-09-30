@@ -9,7 +9,10 @@
 
 export const firebaseConfig = {
   apiKey: "AIzaSyDmMfI9yh8l6L79ENaXHzFGfhC0yuX7z4w",
-  authDomain: "radar-tipologias.firebaseapp.com",
+  // authDomain apunta al propio sitio: netlify.toml reenvía /__/auth a Firebase.
+  // Así el inicio de sesión funciona en celular. Si se prueba fuera de Netlify, usar
+  // "radar-tipologias.firebaseapp.com".
+  authDomain: (location.hostname.endsWith("netlify.app") ? location.hostname : "radar-tipologias.firebaseapp.com"),
   projectId: "radar-tipologias",
   storageBucket: "radar-tipologias.firebasestorage.app",
   messagingSenderId: "946463860160",

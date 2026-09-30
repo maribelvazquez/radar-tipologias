@@ -36,4 +36,5 @@ Mientras `config.js` diga `PEGAR_AQUI`, la encuesta muestra «Modo de prueba» y
 - **Un registro por correo.** El documento se guarda con la huella del correo y las reglas no permiten sobrescribirlo. Si alguien responde dos veces, ve el mensaje de que ya participó y en el stand se le busca por correo.
 - **Taza.** Cada participante recibe un código (por ejemplo `R-5QU5`). En el panel se busca el código y se toca «Pendiente» para marcarla como entregada.
 - **Resultados en vivo.** `radar_stats/convencion-2026` guarda sólo conteos, sin datos personales. Es lo único que el público puede leer.
-- **Información comercial.** La casilla «No deseo…» queda en la columna «Acepta información comercial» del Excel.
+- **Información comercial.** Quien no quiera recibirla lo pide por correo, según el aviso de privacidad.
+- **Entrar al panel desde celular.** `netlify.toml` sirve el inicio de sesión de Google desde el mismo dominio. Requiere, una sola vez, agregar `https://radar-sofipos.netlify.app/__/auth/handler` en Google Cloud → APIs y servicios → Credenciales → «Web client (auto created by Google Service)» → URIs de redireccionamiento autorizados.

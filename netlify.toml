@@ -1,0 +1,14 @@
+# Sirve el inicio de sesión de Google desde el mismo dominio del sitio.
+# Así el panel funciona también en celular (Chrome en iPhone, Safari con
+# protección de rastreo), que bloquean el almacenamiento de firebaseapp.com.
+[[redirects]]
+  from = "/__/auth/*"
+  to = "https://radar-tipologias.firebaseapp.com/__/auth/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/__/firebase/*"
+  to = "https://radar-tipologias.firebaseapp.com/__/firebase/:splat"
+  status = 200
+  force = true

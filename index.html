@@ -406,7 +406,11 @@ async function envia() {
       }, { merge: true }).catch(() => {});
       stats = (await fs.getDoc(ref).catch(() => null))?.data() ?? null;
     } catch (e) {
-      if (String(e?.code || e).includes("permission")) duplicado = true;
+      if (String(e?.code || e).includes("permission")) {
+        duplicado = true;
+        // Aunque ya haya participado, le mostramos cómo va la convención.
+        stats = (await fs.getDoc(fs.doc(db, "radar_stats", edicion)).catch(() => null))?.data() ?? null;
+      }
       else { $("error").textContent = "No se pudo enviar. Revise su conexión e intente de nuevo."; b.disabled = false; b.textContent = "Ver mis resultados"; return; }
     }
   }
