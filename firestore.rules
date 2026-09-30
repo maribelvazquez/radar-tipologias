@@ -37,8 +37,8 @@ service cloud.firestore {
         && textoOpc(request.resource.data.abierta, 280)
         && texto(request.resource.data.codigo, 8)
         && texto(request.resource.data.edicion, 30)
-        && request.resource.data.vistos is list && request.resource.data.vistos.size() >= 1 && request.resource.data.vistos.size() <= 3
-        && request.resource.data.deteccion is map && request.resource.data.deteccion.size() <= 3
+        && request.resource.data.vistos is list && request.resource.data.vistos.size() >= 1 && request.resource.data.vistos.size() <= 5
+        && request.resource.data.deteccion is map && request.resource.data.deteccion.size() <= 5
         && request.resource.data.aviso == true
         && request.resource.data.noInfo is bool
         && request.resource.data.taza == false

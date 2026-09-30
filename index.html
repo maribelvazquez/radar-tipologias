@@ -139,7 +139,7 @@
   <section data-paso="2" class="oculto">
     <p class="eyebrow">2 de 6</p>
     <h2>¿Cuáles de estos comportamientos ha visto en su institución en los últimos seis meses?</h2>
-    <p class="ayuda">Elija hasta tres.</p>
+    <p class="ayuda">Elija hasta cinco.</p>
     <div class="opciones" id="opVistos"></div>
     <p class="contador" id="contVistos"></p>
   </section>
@@ -188,10 +188,9 @@
     <label class="campo"><span>Correo</span><input type="email" id="correo" maxlength="150" autocomplete="email" inputmode="email"></label>
     <label class="campo"><span>Teléfono</span><input type="tel" id="telefono" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="10 dígitos"></label>
     <div class="aviso-caja">
-      Grupo Mexicano de Consultoría 360 trata sus datos para registrar su participación, entregarle el compendio y la taza, y presentar resultados agregados sin identificarle. De manera adicional, para enviarle información de servicios de GMC360 y LEX-QUO. <a href="aviso-privacidad.html" target="_blank" rel="noopener">Aviso de privacidad integral</a>.
+      Con sus datos registramos su participación, le entregamos el compendio y la taza, y le enviamos el resultado final del Radar. También le compartiremos contenidos y soluciones de GMC360 y LEX-QUO sobre los temas que nos contó. <a href="aviso-privacidad.html" target="_blank" rel="noopener">Aviso de privacidad integral</a>.
     </div>
     <label class="check"><input type="checkbox" id="aviso"> <span>He leído el aviso de privacidad.</span></label>
-    <label class="check"><input type="checkbox" id="noInfo"> <span>No deseo que mis datos se usen para recibir información de servicios de GMC360 y LEX-QUO.</span></label>
     <p class="error" id="error"></p>
   </section>
 
@@ -271,7 +270,7 @@ unica("opAlerta", alertas, "alerta");
 unica("opPaso", pasos, "paso");
 
 function pintaVistos() {
-  const lleno = r.vistos.length >= 3 && !r.vistos.includes("ninguno");
+  const lleno = r.vistos.length >= 5 && !r.vistos.includes("ninguno");
   const lista = tipologias.map(t => [t.id, t.opcion]).concat([["ninguno", "Ninguno de estos"]]);
   $("opVistos").innerHTML = lista.map(([id, t]) => {
     const sel = r.vistos.includes(id);
@@ -283,12 +282,12 @@ function pintaVistos() {
     if (v === "ninguno") r.vistos = r.vistos.includes("ninguno") ? [] : ["ninguno"];
     else {
       r.vistos = r.vistos.filter(x => x !== "ninguno");
-      r.vistos = r.vistos.includes(v) ? r.vistos.filter(x => x !== v) : (r.vistos.length < 3 ? [...r.vistos, v] : r.vistos);
+      r.vistos = r.vistos.includes(v) ? r.vistos.filter(x => x !== v) : (r.vistos.length < 5 ? [...r.vistos, v] : r.vistos);
     }
     pintaVistos(); actualiza();
   });
   const n = r.vistos.filter(x => x !== "ninguno").length;
-  $("contVistos").textContent = r.vistos.includes("ninguno") ? "" : `${n} de 3 seleccionados`;
+  $("contVistos").textContent = r.vistos.includes("ninguno") ? "" : `${n} de 5 seleccionados`;
 }
 pintaVistos();
 
@@ -307,7 +306,7 @@ function pintaDeteccion() {
 
 const sel = $("puesto");
 puestos.forEach(p => sel.insertAdjacentHTML("beforeend", `<option>${esc(p)}</option>`));
-$("abierta").oninput = e => { r.abierta = e.target.value; $("cuentaAbierta").textContent = e.target.value.length; };
+$("abierta").oninput = e => { r.abierta = e.target.value; $("cuentaAbierta").textContent = e.target.value.length; actualiza(); };
 ["nombre", "puesto", "institucion", "correo", "telefono", "aviso"].forEach(id => $(id).addEventListener("input", actualiza));
 $("aviso").addEventListener("change", actualiza);
 
@@ -389,7 +388,7 @@ async function envia() {
     paso: r.paso,
     abierta: r.abierta.trim().slice(0, 280),
     aviso: true,
-    noInfo: $("noInfo").checked,
+    noInfo: false,
     codigo,
     taza: false,
   };
